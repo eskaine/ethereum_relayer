@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../../interfaces/UmnTokenInterface.sol";
+import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+import '../../interfaces/UmnTokenInterface.sol';
 
 uint256 constant MAX_TOKEN_MODIFIER = 10000;
 
@@ -11,7 +11,7 @@ contract UmnToken is ERC20, UmnTokenInterface {
     uint256 private _remainingAmount = MAX_TOKEN_MODIFIER * 10**uint(decimals());
 
     modifier enoughAmount(uint256 amount) {
-        require(_remainingAmount >= amount, "Insufficient UMN token!");
+        require(_remainingAmount >= amount, 'Insufficient UMN token!');
         _;
     }
 
@@ -29,7 +29,6 @@ contract UmnToken is ERC20, UmnTokenInterface {
     function getBalance(address user) external view returns (uint256) {
         return _balances[user];
     }
-
 
     function _reduceAmount(uint256 amount) internal enoughAmount(amount) {
         _remainingAmount -= amount;

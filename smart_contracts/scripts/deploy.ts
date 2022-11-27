@@ -7,10 +7,10 @@ import env from './configs/env.config';
 import { writeFileSync }from 'fs';
 
 async function main(): Promise<void> {
-  const tokenName = "UMN Token";
-  const tokenSymbol = "UMN";
+  const tokenName = 'UMN Token';
+  const tokenSymbol = 'UMN';
   
-  const UmnToken = await ethers.getContractFactory("UmnToken");
+  const UmnToken = await ethers.getContractFactory('UmnToken');
   const umnToken = await UmnToken.deploy(tokenName, tokenSymbol);
   await umnToken.deployed();
 
@@ -28,7 +28,7 @@ async function main(): Promise<void> {
   const forwarder = await Forwarder.connect(relaySigner).deploy();
   await forwarder.deployed();
 
-  const Receiver = await ethers.getContractFactory("Receiver");
+  const Receiver = await ethers.getContractFactory('Receiver');
   const receiver = await Receiver.connect(relaySigner)
     .deploy(forwarder.address, umnToken.address);
   await receiver.deployed();
@@ -44,7 +44,7 @@ async function main(): Promise<void> {
     )
   );
 
-  console.log("Receiver deployed to:", receiver.address);
+  console.log('Receiver deployed to:', receiver.address);
 }
 
 const run = async(): Promise<void>  => {
