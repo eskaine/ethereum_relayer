@@ -4,22 +4,29 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "@openzeppelin/contracts/metatx/MinimalForwarder.sol";
 import "./token/UmnToken.sol";
-import "./UserTransaction.sol";
+import "../structs/UserTransaction.sol";
+import "../interfaces/ReceiverInterface.sol";
 
-contract Receiver is ERC2771Context {
+contract Receiver is ERC2771Context, ReceiverInterface {
+    address private _umnTokenAddress;
+
     constructor(
-        MinimalForwarder forwarder
-    ) ERC2771Context(address(forwarder)) {}
+        MinimalForwarder forwarder,
+        address umnTokenAddress
+    ) ERC2771Context(address(forwarder)) {
+        _umnTokenAddress = umnTokenAddress;
+    }
 
     function processTransaction(
-        address[] calldata targets,
         UserTransaction[] calldata txBundle
-    ) external returns (bytes[] memory) {
-        bytes[] memory results = new bytes[](txBundle.length);
+    ) external returns (bool[] memory) {
+        bool[] memory results = new bool[](txBundle.length);
 
         for (uint i; i < txBundle.length; i++) {
-            (, bytes memory result) = targets[i].call(abi.encode(txBundle[i]));
-            results[i] = result;
+            UmnToken token = UmnToken(_umnTokenAddress);
+            bool isSuccessful = token.buy(txBundle[i].user, txBundle[i].amount);
+
+            results[i] = isSuccessful;
         }
 
         return results;
