@@ -1,23 +1,60 @@
-import { ethers } from "hardhat";
+const {
+  DefenderRelayProvider,
+  DefenderRelaySigner,
+} = require('defender-relay-client/lib/ethers')
+import { ethers } from 'hardhat';
+import env from './configs/env.config';
+import { writeFileSync }from 'fs';
 
-async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+async function main(): Promise<void> {
+  const tokenName = "UMN Token";
+  const tokenSymbol = "UMN";
+  
+  const UmnToken = await ethers.getContractFactory("UmnToken");
+  const umnToken = await UmnToken.deploy(tokenName, tokenSymbol);
+  await umnToken.deployed();
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  const credentials = {
+    apiKey: env.RELAY_API_KEY,
+    apiSecret: env.RELAY_API_SECRET,
+};
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  const provider = new DefenderRelayProvider(credentials)
+  const relaySigner = new DefenderRelaySigner(credentials, provider, {
+    speed: 'fast',
+  })
 
-  await lock.deployed();
+  const Forwarder = await ethers.getContractFactory('MinimalForwarder')
+  const forwarder = await Forwarder.connect(relaySigner).deploy();
+  await forwarder.deployed();
 
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  const Receiver = await ethers.getContractFactory("Receiver");
+  const receiver = await Receiver.connect(relaySigner)
+    .deploy(forwarder.address, umnToken.address);
+  await receiver.deployed();
+
+  writeFileSync(
+    'deploy.json',
+    JSON.stringify(
+      {
+        MinimalForwarder: forwarder.address,
+      },
+      null,
+      2
+    )
+  );
+
+  console.log("Receiver deployed to:", receiver.address);
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+const run = async(): Promise<void>  => {
+  try {
+    await main();
+    process.exit(0);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+run();
