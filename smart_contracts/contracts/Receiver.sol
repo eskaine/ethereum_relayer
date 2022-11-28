@@ -6,7 +6,6 @@ import '@openzeppelin/contracts/metatx/MinimalForwarder.sol';
 import './token/UmnToken.sol';
 import '../structs/UserTransaction.sol';
 import '../interfaces/ReceiverInterface.sol';
-import 'hardhat/console.sol';
 
 contract Receiver is ERC2771Context, ReceiverInterface {
     address private _umnTokenAddress;
