@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { UmnToken } from "../typechain-types/contracts/token/UmnToken";
+import { UmnToken } from "../typechain-types/contracts/token";
 
 describe("UMN Token contract", async () => {
   const tokenName = "UMN Token";

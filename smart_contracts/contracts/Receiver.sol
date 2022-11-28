@@ -6,9 +6,12 @@ import '@openzeppelin/contracts/metatx/MinimalForwarder.sol';
 import './token/UmnToken.sol';
 import '../structs/UserTransaction.sol';
 import '../interfaces/ReceiverInterface.sol';
+import 'hardhat/console.sol';
 
 contract Receiver is ERC2771Context, ReceiverInterface {
     address private _umnTokenAddress;
+
+    event ForwardTransaction(bool[] results);
 
     constructor(
         MinimalForwarder forwarder,
@@ -19,7 +22,7 @@ contract Receiver is ERC2771Context, ReceiverInterface {
 
     function processTransaction(
         UserTransaction[] calldata txBundle
-    ) external returns (bool[] memory) {
+    ) external {
         bool[] memory results = new bool[](txBundle.length);
 
         for (uint i; i < txBundle.length; i++) {
@@ -29,6 +32,6 @@ contract Receiver is ERC2771Context, ReceiverInterface {
             results[i] = isSuccessful;
         }
 
-        return results;
+        emit ForwardTransaction(results);
     }
 }

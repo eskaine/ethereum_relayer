@@ -6,5 +6,5 @@ import '../structs/UserTransaction.sol';
 interface ReceiverInterface {
     function processTransaction(
         UserTransaction[] calldata txBundle
-    ) external returns (bool[] memory);
+    ) external;
 }
