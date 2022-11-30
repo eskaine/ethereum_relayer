@@ -1,21 +1,15 @@
-import React from 'react';
+import { useContext } from 'react';
 import './App.css';
+import { EthersContext } from './EthersProvider';
+import { EthersContextInterface } from './interfaces/ethersContext';
 
 function App() {
+  const { connectWallet } = useContext(EthersContext) as EthersContextInterface;
+
   return (
     <div className="App">
       <header className="App-header">
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <button onClick={() => connectWallet()}>Connect Metamask</button>
       </header>
     </div>
   );
