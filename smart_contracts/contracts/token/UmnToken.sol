@@ -10,6 +10,8 @@ contract UmnToken is ERC20, UmnTokenInterface {
     mapping(address => uint256) private _balances;
     uint256 private _remainingAmount = MAX_TOKEN_MODIFIER * 10**uint(decimals());
 
+    event Bought(address indexed who, uint256 amount);
+
     modifier enoughAmount(uint256 amount) {
         require(_remainingAmount >= amount, 'Insufficient UMN token!');
         _;
@@ -19,11 +21,12 @@ contract UmnToken is ERC20, UmnTokenInterface {
         _mint(msg.sender, _remainingAmount);
     }
 
-    function buy(address user, uint256 amount) external returns (bool) {
+    function buy(uint256 amount) external {
         _reduceAmount(amount);
-        _balances[user] += amount;
+        address owner = _msgSender();
+        _balances[owner] += amount;
 
-        return true;
+        emit Bought(owner, amount);
     }
 
     function getBalance(address user) external view returns (uint256) {

@@ -10,7 +10,7 @@ import '../interfaces/ReceiverInterface.sol';
 contract Receiver is ERC2771Context, ReceiverInterface {
     address private _umnTokenAddress;
 
-    event ForwardTransaction(bool[] results);
+    event TxBundleEvent(Result[] results);
 
     constructor(
         MinimalForwarder forwarder,
@@ -20,17 +20,14 @@ contract Receiver is ERC2771Context, ReceiverInterface {
     }
 
     function processTransaction(
-        UserTransaction[] calldata txBundle
+        RequestBody[] calldata txBundle
     ) external {
-        bool[] memory results = new bool[](txBundle.length);
+        Result[] memory results;
 
         for (uint i; i < txBundle.length; i++) {
-            UmnToken token = UmnToken(_umnTokenAddress);
-            bool isSuccessful = token.buy(txBundle[i].user, txBundle[i].amount);
-
-            results[i] = isSuccessful;
+            RequestBody memory requestBody = txBundle[i];
         }
 
-        emit ForwardTransaction(results);
+        emit TxBundleEvent(results);
     }
 }
