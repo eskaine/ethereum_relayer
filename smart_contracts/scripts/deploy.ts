@@ -37,14 +37,14 @@ async function main(): Promise<void> {
     'deploy.json',
     JSON.stringify(
       {
+        UMNToken: umnToken.address,
         MinimalForwarder: forwarder.address,
+        Receiver: receiver.address
       },
       null,
       2
     )
   );
-
-  console.log('Receiver deployed to:', receiver.address);
 }
 
 const run = async(): Promise<void>  => {

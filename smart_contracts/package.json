@@ -1,7 +1,8 @@
 {
   "name": "umn-contracts",
   "scripts": {
-    "deploy-local": "npx hardhat run --network localhost scripts/deploy.ts"
+    "deploy-local": "npx hardhat run --network localhost scripts/deploy.ts",
+    "deploy": "npx hardhat run --network goerli scripts/deploy.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.4",
