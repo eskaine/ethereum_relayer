@@ -1,7 +1,7 @@
-const {
+import {
   DefenderRelayProvider,
   DefenderRelaySigner,
-} = require('defender-relay-client/lib/ethers')
+} from 'defender-relay-client/lib/ethers';
 import { ethers } from 'hardhat';
 import env from './configs/env.config';
 import { writeFileSync }from 'fs';
