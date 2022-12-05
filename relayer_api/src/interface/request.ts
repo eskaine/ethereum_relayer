@@ -1,11 +1,9 @@
-interface Data {
-    amount: string;
-}
+import { Bytes } from "ethers";
 
 interface Request {
     to: string;
     from: string;
-    data: Data;
+    data: Bytes;
     value: number;
     gas: number;
     nonce: any;
@@ -13,5 +11,5 @@ interface Request {
 
 export interface RequestBody {
     request: Request;
-    signature: any;
+    signature: string;
 }
