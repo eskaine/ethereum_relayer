@@ -2,11 +2,11 @@
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
-import '../../interfaces/UmnTokenInterface.sol';
+import '../../interfaces/IUmnToken.sol';
 
 uint256 constant MAX_TOKEN_MODIFIER = 10000;
 
-contract UmnToken is ERC20, UmnTokenInterface {
+contract UmnToken is ERC20, IUmnToken {
     mapping(address => uint256) private _balances;
     uint256 private _remainingAmount = MAX_TOKEN_MODIFIER * 10**uint(decimals());
 
