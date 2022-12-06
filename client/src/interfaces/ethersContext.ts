@@ -1,7 +1,11 @@
-import { ethers } from "ethers";
+import { AxiosResponse } from "axios";
 
-type ConnectWalletFunction = () => Promise<ethers.providers.JsonRpcSigner | null> | null;
+type ConnectWalletFunction = () => Promise<string>;
+type SendTransactionFunction = (amount: number) => Promise<AxiosResponse>;
+type GetAccountFunction = () => string;
 
 export interface EthersContextInterface {
+    getAccount: GetAccountFunction;
     connectWallet: ConnectWalletFunction;
+    sendTransaction: SendTransactionFunction;
 }
