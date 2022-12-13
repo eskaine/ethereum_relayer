@@ -1,43 +1,48 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { MinimalForwarder } from '../typechain-types/@openzeppelin/contracts/metatx';
-import { UserTransactionStruct } from '../typechain-types/interfaces/ReceiverInterface'
-import { Receiver } from '../typechain-types/contracts/Receiver';
-import { TypedEvent } from '../typechain-types/common';
+import { getSignedMetaRequest } from "./utils/signedRequest"
+import { JsonRpcSigner } from '@ethersproject/providers';
 
 describe('Receiver contract', async () => {
-  const tokenName = 'UMN Token';
-  const tokenSymbol = 'UMN';
-  let forwarder: MinimalForwarder;
-  let receiver: Receiver;
-  let accounts: SignerWithAddress[];
-
-  beforeEach(async () => {
-    const UmnToken = await ethers.getContractFactory('UmnToken');
-    const umnToken = await UmnToken.deploy(tokenName, tokenSymbol);
-    await umnToken.deployed();
-
-    const Forwarder = await ethers.getContractFactory('MinimalForwarder');
-    forwarder = await Forwarder.deploy();
-
+  beforeEach(async function () {
+    const UmnToken = await ethers.getContractFactory("UmnToken");
+    const Forwarder = await ethers.getContractFactory("MinimalForwarder");
     const Receiver = await ethers.getContractFactory('Receiver');
-    receiver = await Receiver.deploy(forwarder.address, umnToken.address);
-    accounts = await ethers.getSigners();
-  });
+    
+    const forwarder = await Forwarder.deploy().then(f => f.deployed());
+    this.accounts = await ethers.getSigners();
+    this.umnToken = await UmnToken.deploy(forwarder.address, 'UMN Token', 'UMN').then(f => f.deployed());
+    this.receiver = await Receiver.deploy(forwarder.address, this.umnToken.address).then(f => f.deployed());
 
-  it('Expect all transactions to went through', async () => {
-    const sampleData: UserTransactionStruct[] = [
-      { user: accounts[1].address, amount: 1000 },
-      { user: accounts[2].address, amount: 10000 },
-      { user: accounts[3].address, amount: 100000 },
-    ];
+    const relayer =  this.accounts[1];
+    this.forwarder = forwarder.connect(relayer);
 
-    const connectedReceiver = receiver.connect(accounts[5]);
-    const tx = await connectedReceiver.processTransaction(sampleData).then(tx => tx.wait());
-    const [event] = tx.events as TypedEvent[];
-    const result: boolean[] = event.args.results;
+    this.createUserTx = (user: JsonRpcSigner & SignerWithAddress, amount: number) => {
+      const requestParam = {
+        from: user.address,
+        to: this.umnToken.address,
+        data: this.umnToken.interface.encodeFunctionData('buy', [amount])
+      };
+
+      return getSignedMetaRequest(user.provider, this.forwarder, requestParam);
+    }
+  })
+
+  it('Process meta transaction', async function() {
+    const user1 = this.accounts[2];
+    const user2 = this.accounts[3];
+    const user3 = this.accounts[4];
+
+    const tx1 = await this.createUserTx(user1, 123);
+    const tx2 = await this.createUserTx(user2, 1234);
+    const tx3 = await this.createUserTx(user3, 12345);
+    const metaTx = [tx1, tx2, tx3];
+
+    const res = await this.receiver.processTransaction(metaTx).then((tx: any) => tx.wait());
+    const [event] = res.events.filter((e: any) => e.event == "TxBundleEvent");
+    const result = event.args.results.map((r: any) => r.result);
 
     expect(result).to.not.include(false);
-  });
+  })
 });

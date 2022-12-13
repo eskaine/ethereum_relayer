@@ -9,7 +9,7 @@ import './token/UmnToken.sol';
 interface IReceiver {
     function processTransaction(
         RequestBody[] calldata txBundle
-    ) external;
+    ) external payable;
 }
 
 struct RequestBody {
@@ -23,6 +23,7 @@ struct Result {
 }
 
 contract Receiver is ERC2771Context, IReceiver {
+    address payable public owner;
     address private _umnTokenAddress;
     MinimalForwarder private _forwarder;
 
@@ -31,15 +32,16 @@ contract Receiver is ERC2771Context, IReceiver {
     constructor(
         MinimalForwarder forwarder,
         address umnTokenAddress
-    ) ERC2771Context(address(forwarder)) {
+    ) payable ERC2771Context(address(forwarder)) {
+        owner = payable(msg.sender);
         _forwarder = forwarder;
         _umnTokenAddress = umnTokenAddress;
     }
 
     function processTransaction(
         RequestBody[] calldata txBundle
-    ) external {
-        Result[] memory results;
+    ) external payable {
+        Result[] memory results = new Result[](txBundle.length);
 
         for (uint i; i < txBundle.length; i++) {
             RequestBody memory requestBody = txBundle[i];
