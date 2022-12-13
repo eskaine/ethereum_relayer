@@ -10,10 +10,6 @@ async function main(): Promise<void> {
   const tokenName = 'UMN Token';
   const tokenSymbol = 'UMN';
   
-  const UmnToken = await ethers.getContractFactory('UmnToken');
-  const umnToken = await UmnToken.deploy(tokenName, tokenSymbol);
-  await umnToken.deployed();
-
   const credentials = {
     apiKey: env.RELAY_API_KEY,
     apiSecret: env.RELAY_API_SECRET,
@@ -27,6 +23,11 @@ async function main(): Promise<void> {
   const Forwarder = await ethers.getContractFactory('MinimalForwarder')
   const forwarder = await Forwarder.connect(relaySigner).deploy();
   await forwarder.deployed();
+
+  const UmnToken = await ethers.getContractFactory('UmnToken');
+  const umnToken = await UmnToken.deploy(forwarder.address, tokenName, tokenSymbol);
+  await umnToken.deployed();
+
 
   const Receiver = await ethers.getContractFactory('Receiver');
   const receiver = await Receiver.connect(relaySigner)

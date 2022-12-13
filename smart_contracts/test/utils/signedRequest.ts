@@ -1,6 +1,6 @@
 import { ethers, Contract } from "ethers";
 
-type JsonRpcSigner = ethers.providers.JsonRpcSigner;
+type JsonRpcProvider = ethers.providers.JsonRpcProvider;
 
 interface RequestParams {
     to: string;
@@ -25,7 +25,7 @@ const ForwardRequest = [
 ];
 
 export async function getSignedMetaRequest(
-  signer: JsonRpcSigner,
+  signer: JsonRpcProvider,
   forwarder: Contract,
   requestParams: RequestParams
 ) {
@@ -48,7 +48,7 @@ export async function getSignedMetaRequest(
   };
 
   const [method, argData] = ["eth_signTypedData_v4", JSON.stringify(metaTx)];
-  const signature = await signer.provider.send(method, [
+  const signature = await signer.send(method, [
     requestParams.from,
     argData,
   ]);
